@@ -242,12 +242,9 @@ function evaluatePixel(s){
   };
 
   try {
-    const resp = await fetch('https://sh.dataspace.copernicus.eu/api/v1/process', {
+    const resp = await fetch("/.netlify/functions/ndvi", {
       method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (!resp.ok) {
