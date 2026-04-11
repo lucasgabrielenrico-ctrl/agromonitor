@@ -1,0 +1,12 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Content-Security-Policy = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:"
+
+[functions]
+  node_bundler = "esbuild"

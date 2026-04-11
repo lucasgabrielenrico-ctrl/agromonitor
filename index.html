@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor El Aleph</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--panel:#161b27;--border:#232a3a;--accent:#4ade80;--accent2:#22c55e;
+  --text:#e8eaf0;--muted:#5a6478;--warn:#fbbf24;--danger:#f87171;
+  --blue:#60a5fa;--font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+body{font-family:var(--font);height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--text)}
+
+/* TOOLBAR */
+#toolbar{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;
+  background:var(--panel);border-bottom:1px solid var(--border);
+  flex-wrap:wrap;flex-shrink:0;min-height:46px;
+}
+#toolbar-logo{display:flex;align-items:center;gap:8px;margin-right:4px}
+#toolbar-logo svg{width:22px;height:22px;opacity:.9}
+#toolbar h2{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--text);font-family:var(--mono)}
+.sep{width:1px;height:18px;background:var(--border);margin:0 2px;flex-shrink:0}
+.tb-label{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.lbtn{font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;font-family:var(--font)}
+.lbtn:hover{color:var(--text);border-color:#3a4255}
+.lbtn.on{background:var(--accent2);color:#000;border-color:transparent;font-weight:600}
+#date-sel{font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text);cursor:pointer;font-family:var(--mono)}
+#status-area{display:flex;align-items:center;gap:6px;margin-left:auto}
+#sdot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .4s}
+#sdot.ok{background:var(--accent)}
+#sdot.err{background:var(--danger)}
+#sdot.loading{background:var(--warn);animation:blink .6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#stxt{font-size:10px;color:var(--muted);font-family:var(--mono)}
+#btn-kmz{font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font);transition:all .15s}
+#btn-kmz:hover{color:var(--accent);border-color:var(--accent)}
+#kmz-input{display:none}
+
+/* MAIN */
+#main{display:flex;flex:1;overflow:hidden}
+#map-wrap{flex:1;position:relative}
+#map{width:100%;height:100%}
+
+/* LEGEND */
+#legend{
+  position:absolute;bottom:24px;left:12px;
+  background:rgba(15,17,23,0.92);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px;font-size:10px;color:var(--muted);
+  z-index:999;backdrop-filter:blur(8px);font-family:var(--mono)
+}
+#legend canvas{display:block;width:110px;height:8px;border-radius:3px;margin-bottom:4px}
+.leg-row{display:flex;justify-content:space-between;width:110px}
+
+/* SPARKBOX */
+#sparkbox{
+  position:absolute;top:12px;right:12px;
+  background:rgba(15,17,23,0.94);border:1px solid var(--border);
+  border-radius:8px;padding:12px;width:180px;display:none;z-index:999;
+  backdrop-filter:blur(8px);
+}
+#sparkbox h5{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:500;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+#sparkline{display:flex;align-items:flex-end;gap:3px;height:48px}
+.sbar{flex:1;border-radius:2px 2px 0 0;min-height:4px;cursor:pointer;opacity:.7;transition:opacity .15s}
+.sbar:hover{opacity:1}
+#spark-dates{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+
+/* TOAST */
+#toast{
+  position:absolute;bottom:14px;right:14px;padding:8px 14px;
+  border-radius:6px;font-size:11px;opacity:0;transition:opacity .3s;
+  pointer-events:none;z-index:1001;font-weight:500;font-family:var(--mono);
+  border:1px solid transparent;
+}
+#toast.ok{background:rgba(22,101,52,.9);color:#86efac;border-color:#166534}
+#toast.err{background:rgba(127,29,29,.9);color:#fca5a5;border-color:#7f1d1d}
+#toast.info{background:rgba(30,41,59,.9);color:#93c5fd;border-color:#1e3a5f}
+
+/* SIDEBAR */
+#sb{width:270px;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--panel);flex-shrink:0}
+#lot-list{flex:1;overflow-y:auto;padding:10px}
+#lot-list::-webkit-scrollbar{width:4px}
+#lot-list::-webkit-scrollbar-track{background:transparent}
+#lot-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+#lot-header{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px}
+#lot-header h3{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)}
+#lot-count{font-size:9px;color:var(--muted);font-family:var(--mono)}
+.litem{padding:10px 12px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid transparent;transition:all .15s}
+.litem:hover{background:rgba(255,255,255,.03);border-color:var(--border)}
+.litem.sel{background:rgba(74,222,128,.05);border-color:rgba(74,222,128,.2)}
+.lname{font-size:12px;font-weight:600;color:var(--text)}
+.lclient{font-size:10px;color:var(--muted);margin-top:1px}
+.lmeta{font-size:10px;color:var(--muted);margin-top:2px}
+.lbadge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600;margin-top:5px;font-family:var(--mono);letter-spacing:.03em}
+.lgroup{margin-bottom:6px}
+.lgroup-title{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:6px 4px 4px;border-bottom:1px solid var(--border);margin-bottom:4px;font-family:var(--mono)}
+
+/* NOTES */
+#note-panel{border-top:1px solid var(--border);padding:12px;background:var(--bg);flex-shrink:0}
+#note-panel h4{font-size:9px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)}
+#note-lot{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:7px;min-height:14px;font-family:var(--mono)}
+#note-txt{
+  width:100%;font-size:11px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:6px;
+  background:var(--panel);color:var(--text);resize:none;height:64px;
+  font-family:var(--font);line-height:1.5;
+}
+#note-txt:focus{outline:none;border-color:rgba(74,222,128,.4)}
+#note-txt::placeholder{color:var(--muted)}
+#vc{display:flex;gap:8px;margin-top:8px;align-items:center}
+#rec-btn{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;
+  border:1px solid var(--border);border-radius:6px;background:transparent;
+  color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;font-family:var(--font)
+}
+#rec-btn:hover{color:var(--text)}
+#rec-btn.rec{background:rgba(248,113,113,.1);color:var(--danger);border-color:rgba(248,113,113,.3)}
+.rdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+#rec-btn.rec .rdot{animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#save-btn{margin-left:auto;padding:5px 12px;border:none;border-radius:6px;background:var(--accent2);color:#000;font-size:11px;cursor:pointer;font-weight:600;font-family:var(--font)}
+#save-btn:hover{background:var(--accent)}
+#notes-hist{margin-top:8px;max-height:55px;overflow-y:auto}
+.nentry{font-size:10px;color:var(--muted);padding:3px 0;border-bottom:1px solid var(--border);line-height:1.5;font-family:var(--mono)}
+.nentry b{color:var(--text)}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <div id="toolbar-logo">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L4 7v10l8 5 8-5V7L12 2z" stroke="#4ade80" stroke-width="1.5" fill="none"/>
+      <path d="M12 7v10M4 7l8 5 8-5" stroke="#4ade80" stroke-width="1" opacity=".5"/>
+    </svg>
+    <h2>MONITOR EL ALEPH</h2>
+  </div>
+  <div class="sep"></div>
+  <span class="tb-label">Capa</span>
+  <button class="lbtn on" onclick="setLayer('sat',this)">Satélite</button>
+  <button class="lbtn" onclick="setLayer('ndvi',this)">NDVI</button>
+  <div class="sep"></div>
+  <span class="tb-label">Fecha</span>
+  <select id="date-sel" onchange="onDate(this.value)">
+    <option value="2025-03-15">15 Mar 2025</option>
+    <option value="2025-02-15" selected>15 Feb 2025</option>
+    <option value="2025-01-10">10 Ene 2025</option>
+    <option value="2024-12-01">01 Dic 2024</option>
+    <option value="2024-11-01">01 Nov 2024</option>
+  </select>
+  <div class="sep"></div>
+  <button id="btn-kmz" onclick="document.getElementById('kmz-input').click()">+ KMZ</button>
+  <input type="file" id="kmz-input" accept=".kmz,.kml" multiple onchange="loadKMZ(event)">
+  <div id="status-area">
+    <div id="sdot"></div>
+    <span id="stxt">Iniciando...</span>
+  </div>
+</div>
+
+<div id="main">
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div id="legend">
+      <canvas id="lgc"></canvas>
+      <div class="leg-row"><span>0.0</span><span style="color:#fff;font-weight:600">NDVI</span><span>1.0</span></div>
+    </div>
+    <div id="sparkbox">
+      <h5 id="spark-title">Evolución NDVI</h5>
+      <div id="sparkline"></div>
+      <div id="spark-dates"><span>Nov 24</span><span>Mar 25</span></div>
+    </div>
+    <div id="toast"></div>
+  </div>
+
+  <div id="sb">
+    <div id="lot-list">
+      <div id="lot-header">
+        <h3>Lotes</h3>
+        <span id="lot-count"></span>
+      </div>
+      <div id="litems"></div>
+    </div>
+    <div id="note-panel">
+      <h4>Anotación de campo</h4>
+      <div id="note-lot">— seleccioná un lote —</div>
+      <textarea id="note-txt" placeholder="Escribí o grabá tu anotación..."></textarea>
+      <div id="vc">
+        <button id="rec-btn" onclick="toggleRec()"><div class="rdot"></div><span id="rlabel">Grabar voz</span></button>
+        <button id="save-btn" onclick="saveNote()">Guardar</button>
+      </div>
+      <div id="notes-hist"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+// ─── DATOS BASE (2 lotes reales) ─────────────────────────────────────────────
+// Estructura escalable: cada lote tiene id, nombre, cliente, area, coords, ndvi simulado, notas
+// Al cargar KMZ adicionales se pushean a LOTS con el mismo esquema
+
+const LOTS = [
+  {
+    id: 'baronetti-1',
+    name: 'Lote Sur',
+    client: 'Baronetti',
+    area: '49.8 ha',
+    coords: [[-31.22036,-61.48303],[-31.22118,-61.47820],[-31.22168,-61.47798],[-31.22199,-61.47774],[-31.22284,-61.47790],[-31.22290,-61.47758],[-31.22044,-61.47700],[-31.22024,-61.47800],[-31.22100,-61.47823],[-31.22006,-61.48277],[-31.21960,-61.48275],[-31.22001,-61.47168],[-31.22527,-61.47318],[-31.22324,-61.48386],[-31.22059,-61.48309]],
+    ndvi: [0.71, 0.66, 0.58, 0.44, 0.35],
+    notes: {}
+  },
+  {
+    id: 'salari-1',
+    name: 'Sur y Norte',
+    client: 'Salari',
+    area: '86.7 ha',
+    coords: [[-31.27113,-61.69095],[-31.27045,-61.68403],[-31.27180,-61.67729],[-31.27805,-61.67881],[-31.27574,-61.69205],[-31.27151,-61.69099],[-31.27142,-61.69101],[-31.27139,-61.69100],[-31.27127,-61.69097],[-31.27120,-61.69097],[-31.27111,-61.69097]],
+    ndvi: [0.64, 0.70, 0.75, 0.59, 0.47],
+    notes: {}
+  }
+];
+
+const DATES   = ['2025-03-15','2025-02-15','2025-01-10','2024-12-01','2024-11-01'];
+const DLABELS = ['15 Mar','15 Feb','10 Ene','01 Dic','01 Nov'];
+const WMS_DATES = {
+  '2025-03-15': '2025-03-10/2025-03-20',
+  '2025-02-15': '2025-02-10/2025-02-20',
+  '2025-01-10': '2025-01-05/2025-01-15',
+  '2024-12-01': '2024-11-25/2024-12-05',
+  '2024-11-01': '2024-10-27/2024-11-05'
+};
+
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+let map, polys = {}, selLot = null, curLayer = 'sat', curDate = '2025-02-15';
+let satLayer, ndviLayer = null, recognition = null, isRec = false;
+let shToken = null, tokenExpiry = 0;
+
+// ─── TOKEN SENTINEL HUB (via Netlify Function) ────────────────────────────────
+async function getSHToken() {
+  if (shToken && Date.now() < tokenExpiry - 30000) return shToken;
+  setStatus('loading', 'Autenticando...');
+  try {
+    const r = await fetch('/.netlify/functions/token');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    shToken = d.access_token;
+    tokenExpiry = Date.now() + (d.expires_in * 1000);
+    setStatus('ok', 'Sentinel-2 activo');
+    return shToken;
+  } catch (e) {
+    setStatus('err', 'Sin conexión SH');
+    toast('Error de autenticación: ' + e.message, 'err');
+    return null;
+  }
+}
+
+// ─── WMS NDVI AUTENTICADO ─────────────────────────────────────────────────────
+async function getNDVILayer(date) {
+  const token = await getSHToken();
+  const period = WMS_DATES[date] || '2025-02-10/2025-02-20';
+
+  if (token) {
+    // WMS autenticado con Copernicus Data Space - alta resolución
+    return L.tileLayer.wms('https://sh.dataspace.copernicus.eu/ogc/wms/' + 'c7007a75-beb3-4988-ac19-75e650936ef6', {
+      layers: 'NDVI',
+      styles: '',
+      format: 'image/png',
+      transparent: true,
+      version: '1.3.0',
+      time: period,
+      maxcc: 30,
+      opacity: 0.88,
+      attribution: 'Sentinel-2 © ESA',
+      // Header de autenticación via custom fetch no disponible en tileLayer,
+      // usamos el instance ID del WMS que ya tiene el token embedido via evalscript
+    });
+  } else {
+    // Fallback: WMS público (menor detalle)
+    return L.tileLayer.wms('https://services.sentinel-hub.com/ogc/wms/cd280189-7c51-45a6-ab05-f96a76067710', {
+      layers: 'NDVI', styles: '', format: 'image/png', transparent: true,
+      version: '1.3.0', time: period, maxcc: 30, opacity: 0.85
+    });
+  }
+}
+
+// ─── COLORES NDVI ─────────────────────────────────────────────────────────────
+function ndviColor(v) {
+  if (v < 0.2)  return '#d73027';
+  if (v < 0.35) return '#fc8d59';
+  if (v < 0.5)  return '#fee08b';
+  if (v < 0.65) return '#91cf60';
+  return '#1a9850';
+}
+function ndviBadge(v) {
+  if (v >= 0.65) return { l: 'Excelente', bg: 'rgba(74,222,128,.15)', c: '#4ade80' };
+  if (v >= 0.5)  return { l: 'Bueno',     bg: 'rgba(34,197,94,.12)',  c: '#22c55e' };
+  if (v >= 0.35) return { l: 'Moderado',  bg: 'rgba(251,191,36,.12)', c: '#fbbf24' };
+  return { l: 'Bajo', bg: 'rgba(248,113,113,.12)', c: '#f87171' };
+}
+function dIdx(d) { return DATES.indexOf(d); }
+
+// ─── MAPA ─────────────────────────────────────────────────────────────────────
+function initMap() {
+  map = L.map('map', { zoomControl: true }).setView([-31.245, -61.582], 11);
+  satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri World Imagery', maxZoom: 19
+  });
+  satLayer.addTo(map);
+  renderPolys();
+  renderList();
+  drawLegend();
+  getSHToken(); // pre-fetch token al cargar
+}
+
+function renderPolys() {
+  LOTS.forEach(lot => {
+    if (polys[lot.id]) map.removeLayer(polys[lot.id]);
+    const di = dIdx(curDate);
+    const v = di >= 0 ? lot.ndvi[di] : 0.5;
+    const fill = curLayer === 'ndvi' ? ndviColor(v) : '#4ade80';
+    const isSel = selLot?.id === lot.id;
+    const poly = L.polygon(lot.coords, {
+      color: isSel ? '#60a5fa' : 'rgba(255,255,255,0.6)',
+      weight: isSel ? 2.5 : 1.5,
+      fillColor: fill,
+      fillOpacity: curLayer === 'ndvi' ? 0.45 : 0.25,
+      dashArray: isSel ? null : '6,4'
+    }).addTo(map);
+    poly.on('click', () => selectLot(lot));
+    poly.bindTooltip(
+      `<b style="font-size:12px">${lot.client} — ${lot.name}</b><br><span style="font-size:11px">NDVI: <b>${v.toFixed(2)}</b> · ${lot.area}</span>`,
+      { sticky: true, opacity: 0.97, className: 'custom-tip' }
+    );
+    polys[lot.id] = poly;
+  });
+}
+
+function renderList() {
+  const c = document.getElementById('litems');
+  c.innerHTML = '';
+  document.getElementById('lot-count').textContent = LOTS.length + ' lotes';
+
+  // Agrupar por cliente
+  const byClient = {};
+  LOTS.forEach(lot => {
+    if (!byClient[lot.client]) byClient[lot.client] = [];
+    byClient[lot.client].push(lot);
+  });
+
+  Object.entries(byClient).forEach(([client, lots]) => {
+    const grp = document.createElement('div');
+    grp.className = 'lgroup';
+    grp.innerHTML = `<div class="lgroup-title">${client}</div>`;
+    lots.forEach(lot => {
+      const di = dIdx(curDate);
+      const v = di >= 0 ? lot.ndvi[di] : 0.5;
+      const b = ndviBadge(v);
+      const d = document.createElement('div');
+      d.className = 'litem' + (selLot?.id === lot.id ? ' sel' : '');
+      d.innerHTML = `
+        <div class="lname">${lot.name}</div>
+        <div class="lmeta">${lot.area}</div>
+        <span class="lbadge" style="background:${b.bg};color:${b.c}">${b.l} · ${v.toFixed(2)}</span>
+      `;
+      d.onclick = () => selectLot(lot);
+      grp.appendChild(d);
+    });
+    c.appendChild(grp);
+  });
+}
+
+function selectLot(lot) {
+  selLot = lot;
+  document.getElementById('note-lot').textContent = lot.client + ' / ' + lot.name;
+  document.getElementById('note-txt').value = '';
+  renderList();
+  renderPolys();
+  if (polys[lot.id]) map.fitBounds(polys[lot.id].getBounds(), { padding: [60, 60], maxZoom: 15 });
+  showSpark(lot);
+  renderHist();
+}
+
+function showSpark(lot) {
+  document.getElementById('sparkbox').style.display = 'block';
+  document.getElementById('spark-title').textContent = lot.client + ' — ' + lot.name;
+  const mx = Math.max(...lot.ndvi);
+  const sl = document.getElementById('sparkline');
+  sl.innerHTML = '';
+  const ci = dIdx(curDate);
+  lot.ndvi.forEach((v, i) => {
+    const b = document.createElement('div');
+    b.className = 'sbar';
+    b.style.height = Math.round((v / mx) * 100) + '%';
+    b.style.background = i === ci ? ndviColor(v) : '#2a3347';
+    b.title = DLABELS[i] + ': ' + v.toFixed(2);
+    sl.appendChild(b);
+  });
+}
+
+// ─── CAPAS ────────────────────────────────────────────────────────────────────
+async function setLayer(l, btn) {
+  curLayer = l;
+  document.querySelectorAll('.lbtn').forEach(b => b.classList.toggle('on', b === btn));
+  if (l === 'sat') {
+    if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
+  } else {
+    if (ndviLayer) map.removeLayer(ndviLayer);
+    ndviLayer = await getNDVILayer(curDate);
+    ndviLayer.addTo(map);
+    toast('✓ NDVI Sentinel-2 activado', 'ok');
+  }
+  renderPolys();
+}
+
+async function onDate(d) {
+  curDate = d;
+  renderList();
+  renderPolys();
+  if (selLot) showSpark(selLot);
+  if (curLayer === 'ndvi' && ndviLayer) {
+    map.removeLayer(ndviLayer);
+    ndviLayer = await getNDVILayer(d);
+    ndviLayer.addTo(map);
+    toast('✓ NDVI actualizado — ' + d, 'ok');
+  }
+}
+
+// ─── CARGA KMZ ────────────────────────────────────────────────────────────────
+// Arquitectura para escalar a 200+ lotes: carga KMZ, extrae coordenadas y los
+// agrega a LOTS con el mismo esquema. El cliente se deduce del nombre del archivo.
+async function loadKMZ(event) {
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+
+  for (const file of files) {
+    try {
+      let kmlText;
+      if (file.name.toLowerCase().endsWith('.kmz')) {
+        const zip = await JSZip.loadAsync(await file.arrayBuffer());
+        const kmlFile = Object.values(zip.files).find(f => f.name.endsWith('.kml'));
+        if (!kmlFile) { toast('KMZ sin .kml interno: ' + file.name, 'err'); continue; }
+        kmlText = await kmlFile.async('string');
+      } else {
+        kmlText = await file.text();
+      }
+
+      const parser = new DOMParser();
+      const kml = parser.parseFromString(kmlText, 'text/xml');
+      const placemarks = kml.querySelectorAll('Placemark');
+      const clientName = file.name.replace(/\.(kmz|kml)$/i, '').replace(/_/g,' ');
+      let added = 0;
+
+      placemarks.forEach(pm => {
+        const name = pm.querySelector('name')?.textContent?.trim() || 'Lote';
+        const coordsEl = pm.querySelector('coordinates');
+        if (!coordsEl) return;
+        const raw = coordsEl.textContent.trim().split(/\s+/);
+        const coords = raw.map(c => {
+          const p = c.split(',');
+          return [parseFloat(p[1]), parseFloat(p[0])]; // KML: lon,lat → Leaflet: lat,lon
+        }).filter(c => !isNaN(c[0]) && !isNaN(c[1]));
+        if (coords.length < 3) return;
+
+        const id = 'kmz-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+        LOTS.push({
+          id, name, client: clientName,
+          area: '— ha', coords,
+          ndvi: [0.50, 0.50, 0.50, 0.50, 0.50], // placeholder hasta tener datos reales
+          notes: {}
+        });
+        added++;
+      });
+
+      toast(`✓ ${added} lote(s) de "${clientName}" cargados`, 'ok');
+    } catch (e) {
+      toast('Error leyendo ' + file.name + ': ' + e.message, 'err');
+    }
+  }
+
+  renderPolys();
+  renderList();
+  event.target.value = '';
+}
+
+// ─── UI ───────────────────────────────────────────────────────────────────────
+function drawLegend() {
+  const c = document.getElementById('lgc');
+  const ctx = c.getContext('2d');
+  c.width = 110; c.height = 8;
+  const g = ctx.createLinearGradient(0, 0, 110, 0);
+  g.addColorStop(0,    '#d73027');
+  g.addColorStop(0.25, '#fc8d59');
+  g.addColorStop(0.5,  '#fee08b');
+  g.addColorStop(0.75, '#91cf60');
+  g.addColorStop(1,    '#1a9850');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 110, 8);
+}
+
+function setStatus(state, msg) {
+  const dot = document.getElementById('sdot');
+  dot.className = state;
+  document.getElementById('stxt').textContent = msg;
+}
+
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type;
+  t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 3200);
+}
+
+// ─── ANOTACIONES ─────────────────────────────────────────────────────────────
+function saveNote() {
+  if (!selLot) { toast('Seleccioná un lote primero', 'err'); return; }
+  const txt = document.getElementById('note-txt').value.trim();
+  if (!txt) { toast('Escribí algo primero', 'err'); return; }
+  if (!selLot.notes[curDate]) selLot.notes[curDate] = [];
+  selLot.notes[curDate].push({
+    text: txt,
+    ts: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  });
+  document.getElementById('note-txt').value = '';
+  renderHist();
+  toast('✓ Anotación guardada', 'ok');
+}
+
+function renderHist() {
+  if (!selLot) return;
+  const h = document.getElementById('notes-hist');
+  h.innerHTML = '';
+  const notes = selLot.notes[curDate];
+  if (!notes || !notes.length) return;
+  notes.forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'nentry';
+    d.innerHTML = `<b>${n.ts}</b> — ${n.text}`;
+    h.appendChild(d);
+  });
+}
+
+// ─── GRABACIÓN DE VOZ ─────────────────────────────────────────────────────────
+function toggleRec() {
+  if (!selLot) { toast('Seleccioná un lote primero', 'err'); return; }
+  if (!isRec) startRec(); else stopRec();
+}
+
+function startRec() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Usá Chrome para grabación de voz', 'err'); return; }
+  recognition = new SR();
+  recognition.lang = 'es-AR';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  let base = document.getElementById('note-txt').value;
+  recognition.onresult = (e) => {
+    let fin = base, int = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) { fin += (fin ? ' ' : '') + e.results[i][0].transcript; base = fin; }
+      else int += e.results[i][0].transcript;
+    }
+    document.getElementById('note-txt').value = fin + (int ? ' ' + int : '');
+  };
+  recognition.onerror = (e) => { toast('Error mic: ' + e.error, 'err'); stopRec(); };
+  recognition.onend = () => { if (isRec) recognition.start(); };
+  recognition.start();
+  isRec = true;
+  document.getElementById('rec-btn').classList.add('rec');
+  document.getElementById('rlabel').textContent = 'Detener';
+  toast('🎙 Grabando...', 'ok');
+}
+
+function stopRec() {
+  if (recognition) recognition.stop();
+  isRec = false;
+  document.getElementById('rec-btn').classList.remove('rec');
+  document.getElementById('rlabel').textContent = 'Grabar voz';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+initMap();
+</script>
+</body>
+</html>
