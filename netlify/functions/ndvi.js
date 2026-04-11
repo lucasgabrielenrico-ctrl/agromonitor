@@ -9,7 +9,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const body = JSON.parse(event.body);
+    const { bbox, time, width, height } = JSON.parse(event.body);
 
     // Obtener token
     const tokenRes = await fetch('https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token', {
@@ -24,22 +24,30 @@ exports.handler = async (event, context) => {
     const tokenData = await tokenRes.json();
     const token = tokenData.access_token;
 
-    // Llamar a Process API
-    const ndviRes = await fetch('https://sh.dataspace.copernicus.eu/api/v1/process', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+    // WMS request con token
+    const wmsUrl = new URL('https://sh.dataspace.copernicus.eu/ogc/wms/dbd04f79-bcc0-404f-b901-1a1b7ff53e28');
+    wmsUrl.searchParams.set('SERVICE', 'WMS');
+    wmsUrl.searchParams.set('REQUEST', 'GetMap');
+    wmsUrl.searchParams.set('LAYERS', 'NDVI');
+    wmsUrl.searchParams.set('BBOX', bbox);
+    wmsUrl.searchParams.set('WIDTH', width || 512);
+    wmsUrl.searchParams.set('HEIGHT', height || 512);
+    wmsUrl.searchParams.set('FORMAT', 'image/png');
+    wmsUrl.searchParams.set('CRS', 'EPSG:4326');
+    wmsUrl.searchParams.set('VERSION', '1.3.0');
+    wmsUrl.searchParams.set('TIME', time);
+    wmsUrl.searchParams.set('MAXCC', '30');
+
+    const wmsRes = await fetch(wmsUrl.toString(), {
+      headers: { 'Authorization': 'Bearer ' + token }
     });
 
-    if (!ndviRes.ok) {
-      const err = await ndviRes.text();
-      return { statusCode: ndviRes.status, headers: cors, body: err };
+    if (!wmsRes.ok) {
+      const err = await wmsRes.text();
+      return { statusCode: wmsRes.status, headers: cors, body: err };
     }
 
-    const buffer = await ndviRes.arrayBuffer();
+    const buffer = await wmsRes.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
 
     return {
