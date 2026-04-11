@@ -232,38 +232,20 @@ async function getSHToken() {
   }
 }
 
-// ─── NDVI via Netlify proxy WMS ───────────────────────────────────────────────
-async function buildNDVILayer(date) {
-  const mapBounds = map.getBounds();
-  const size = map.getSize();
+// ─── NDVI via WMS público Copernicus (tile layer directo) ────────────────────
+function buildNDVILayer(date) {
   const period = dateToWMS(date);
-  const w = Math.min(Math.round(size.x), 512);
-  const h = Math.min(Math.round(size.y), 512);
-  const bbox = mapBounds.getSouth()+','+mapBounds.getWest()+','+mapBounds.getNorth()+','+mapBounds.getEast();
-
-  document.getElementById('ndvi-loading').style.display = 'block';
-  try {
-    const resp = await fetch('/.netlify/functions/ndvi', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bbox, time: period, width: w, height: h, layer: curIndice })
-    });
-    document.getElementById('ndvi-loading').style.display = 'none';
-    if (!resp.ok) {
-      const err = await resp.text();
-      console.error('NDVI error:', resp.status, err);
-      toast('Error NDVI: ' + resp.status, 'err');
-      return null;
-    }
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    return L.imageOverlay(url, mapBounds, { opacity: 0.88, interactive: false });
-  } catch(e) {
-    document.getElementById('ndvi-loading').style.display = 'none';
-    console.error('buildNDVILayer error:', e);
-    toast('Error de conexión NDVI', 'err');
-    return null;
-  }
+  return L.tileLayer.wms('https://sh.dataspace.copernicus.eu/ogc/wms/dbd04f79-bcc0-404f-b901-1a1b7ff53e28', {
+    layers: curIndice,
+    styles: '',
+    format: 'image/png',
+    transparent: true,
+    version: '1.3.0',
+    time: period,
+    maxcc: 30,
+    opacity: 0.88,
+    attribution: 'Sentinel-2 © ESA'
+  });
 }
 
 // ─── COLORES ──────────────────────────────────────────────────────────────────
@@ -354,12 +336,9 @@ async function setLayer(l,btn){
   if(ndviLayer){map.removeLayer(ndviLayer);ndviLayer=null;}
   if(l==='indice'){
     const label = INDICES[curIndice] || curIndice;
-    toast('Cargando '+label+'...','info');
-    ndviLayer=await buildNDVILayer(curDate);
-    if(ndviLayer){
-      ndviLayer.addTo(map);
-      toast('✓ '+label+' cargado','ok');
-    }
+    ndviLayer = buildNDVILayer(curDate);
+    ndviLayer.addTo(map);
+    toast('✓ '+label+' cargado','ok');
   }
   renderPolys();
 }
@@ -369,9 +348,9 @@ async function onDate(d){
   if(selLot)showSpark(selLot);
   if(curLayer==='indice'){
     if(ndviLayer){map.removeLayer(ndviLayer);ndviLayer=null;}
-    toast('Actualizando NDVI...','info');
-    ndviLayer=await buildNDVILayer(d);
-    if(ndviLayer){ndviLayer.addTo(map);toast('✓ NDVI actualizado','ok');}
+    ndviLayer=buildNDVILayer(d);
+    ndviLayer.addTo(map);
+    toast('✓ '+( INDICES[curIndice]||curIndice)+' actualizado','ok');
   }
 }
 
@@ -380,9 +359,9 @@ async function onIndice(ind) {
   curIndice = ind;
   if (curLayer === 'indice') {
     if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
-    toast('Cargando ' + INDICES[ind] + '...', 'info');
-    ndviLayer = await buildNDVILayer(curDate);
-    if (ndviLayer) { ndviLayer.addTo(map); toast('✓ ' + INDICES[ind], 'ok'); }
+    ndviLayer = buildNDVILayer(curDate);
+    ndviLayer.addTo(map);
+    toast('✓ ' + INDICES[ind], 'ok');
   }
 }
 
