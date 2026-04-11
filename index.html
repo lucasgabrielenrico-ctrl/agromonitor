@@ -201,19 +201,17 @@ async function getSHToken() {
   }
 }
 
-// ─── NDVI via Process API (canvas overlay) ───────────────────────────────────
-// Sentinel Hub Process API acepta Bearer token y devuelve imagen PNG con NDVI coloreado
-async function fetchNDVIImage(bounds, width, height, date) {
-  const token = await getSHToken();
-  if (!token) return null;
-
+// ─── NDVI via Netlify proxy → imagen PNG → overlay ───────────────────────────
+async function buildNDVILayer(date) {
+  const mapBounds = map.getBounds();
+  const size = map.getSize();
   const period = WMS_DATES[date] || '2025-02-10/2025-02-20';
   const [dateFrom, dateTo] = period.split('/');
 
   const body = {
     input: {
       bounds: {
-        bbox: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+        bbox: [mapBounds.getWest(), mapBounds.getSouth(), mapBounds.getEast(), mapBounds.getNorth()],
         properties: { crs: 'http://www.opengis.net/def/crs/EPSG/0/4326' }
       },
       data: [{
@@ -222,8 +220,8 @@ async function fetchNDVIImage(bounds, width, height, date) {
       }]
     },
     output: {
-      width: Math.min(width, 512),
-      height: Math.min(height, 512),
+      width: Math.min(Math.round(size.x), 512),
+      height: Math.min(Math.round(size.y), 512),
       responses: [{ identifier: 'default', format: { type: 'image/png' } }]
     },
     evalscript: `//VERSION=3
@@ -241,40 +239,29 @@ function evaluatePixel(s){
 }`
   };
 
+  document.getElementById('ndvi-loading').style.display = 'block';
   try {
-    const resp = await fetch("/.netlify/functions/ndvi", {
+    const resp = await fetch('/.netlify/functions/ndvi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+    document.getElementById('ndvi-loading').style.display = 'none';
     if (!resp.ok) {
       const err = await resp.text();
-      console.error('Process API error:', err);
+      console.error('NDVI error:', err);
+      toast('Error NDVI: ' + resp.status, 'err');
       return null;
     }
     const blob = await resp.blob();
-    return URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    return L.imageOverlay(url, mapBounds, { opacity: 0.88, interactive: false });
   } catch(e) {
-    console.error('fetchNDVIImage error:', e);
+    document.getElementById('ndvi-loading').style.display = 'none';
+    console.error('buildNDVILayer error:', e);
+    toast('Error de conexión NDVI', 'err');
     return null;
   }
-}
-
-// ─── NDVI OVERLAY LAYER ───────────────────────────────────────────────────────
-async function buildNDVILayer(date) {
-  const mapBounds = map.getBounds();
-  const size = map.getSize();
-
-  document.getElementById('ndvi-loading').style.display = 'block';
-  const url = await fetchNDVIImage(mapBounds, size.x, size.y, date);
-  document.getElementById('ndvi-loading').style.display = 'none';
-
-  if (!url) {
-    toast('No se pudo cargar NDVI. Verificá nubes o fecha.', 'err');
-    return null;
-  }
-
-  return L.imageOverlay(url, mapBounds, { opacity: 0.88, interactive: false });
 }
 
 // ─── COLORES ──────────────────────────────────────────────────────────────────
