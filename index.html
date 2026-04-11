@@ -201,55 +201,26 @@ async function getSHToken() {
   }
 }
 
-// ─── NDVI via Netlify proxy → imagen PNG → overlay ───────────────────────────
+// ─── NDVI via Netlify proxy WMS ───────────────────────────────────────────────
 async function buildNDVILayer(date) {
   const mapBounds = map.getBounds();
   const size = map.getSize();
   const period = WMS_DATES[date] || '2025-02-10/2025-02-20';
-  const [dateFrom, dateTo] = period.split('/');
-
-  const body = {
-    input: {
-      bounds: {
-        bbox: [mapBounds.getWest(), mapBounds.getSouth(), mapBounds.getEast(), mapBounds.getNorth()],
-        properties: { crs: 'http://www.opengis.net/def/crs/EPSG/0/4326' }
-      },
-      data: [{
-        type: 'sentinel-2-l2a',
-        dataFilter: { timeRange: { from: dateFrom+'T00:00:00Z', to: dateTo+'T23:59:59Z' }, maxCloudCoverage: 30 }
-      }]
-    },
-    output: {
-      width: Math.min(Math.round(size.x), 512),
-      height: Math.min(Math.round(size.y), 512),
-      responses: [{ identifier: 'default', format: { type: 'image/png' } }]
-    },
-    evalscript: `//VERSION=3
-function setup(){return{input:["B04","B08","dataMask"],output:{bands:4}}}
-function evaluatePixel(s){
-  var ndvi=(s.B08-s.B04)/(s.B08+s.B04);
-  var r,g,b;
-  if(ndvi<0.0){r=0.5;g=0.5;b=0.5;}
-  else if(ndvi<0.2){r=0.843;g=0.188;b=0.153;}
-  else if(ndvi<0.35){r=0.988;g=0.553;b=0.349;}
-  else if(ndvi<0.5){r=0.996;g=0.878;b=0.545;}
-  else if(ndvi<0.65){r=0.569;g=0.812;b=0.376;}
-  else{r=0.102;g=0.596;b=0.314;}
-  return[r,g,b,s.dataMask*0.85];
-}`
-  };
+  const w = Math.min(Math.round(size.x), 512);
+  const h = Math.min(Math.round(size.y), 512);
+  const bbox = mapBounds.getSouth()+','+mapBounds.getWest()+','+mapBounds.getNorth()+','+mapBounds.getEast();
 
   document.getElementById('ndvi-loading').style.display = 'block';
   try {
     const resp = await fetch('/.netlify/functions/ndvi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ bbox, time: period, width: w, height: h })
     });
     document.getElementById('ndvi-loading').style.display = 'none';
     if (!resp.ok) {
       const err = await resp.text();
-      console.error('NDVI error:', err);
+      console.error('NDVI error:', resp.status, err);
       toast('Error NDVI: ' + resp.status, 'err');
       return null;
     }
