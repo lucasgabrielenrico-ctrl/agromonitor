@@ -232,13 +232,20 @@ async function getSHToken() {
   }
 }
 
-// ─── NDVI via WMS autenticado con token en URL ───────────────────────────────
-async function buildNDVILayer(date) {
-  const token = await getSHToken();
+// ─── NDVI via WMS público Sentinel Hub ───────────────────────────────────────
+function buildNDVILayer(date) {
   const period = dateToWMS(date);
-  const baseUrl = 'https://sh.dataspace.copernicus.eu/ogc/wms/dbd04f79-bcc0-404f-b901-1a1b7ff53e28';
-  return L.tileLayer.wms(baseUrl, {
-    layers: curIndice,
+  // Mapeo de índices al layer ID del WMS público de Sentinel Hub
+  const layerMap = {
+    'NDVI': 'NDVI',
+    'NDWI': 'NDWI',
+    'MOISTURE-INDEX': 'MOISTURE_STRESS',
+    'FALSE-COLOR': 'FALSE_COLOR',
+    'AGRICULTURE': 'AGRICULTURE'
+  };
+  const layer = layerMap[curIndice] || 'NDVI';
+  return L.tileLayer.wms('https://services.sentinel-hub.com/ogc/wms/cd280189-7c51-45a6-ab05-f96a76067710', {
+    layers: layer,
     styles: '',
     format: 'image/png',
     transparent: true,
@@ -246,8 +253,7 @@ async function buildNDVILayer(date) {
     time: period,
     maxcc: 30,
     opacity: 0.88,
-    attribution: 'Sentinel-2 © ESA',
-    access_token: token
+    attribution: 'Sentinel-2 © ESA'
   });
 }
 
@@ -339,7 +345,7 @@ async function setLayer(l,btn){
   if(ndviLayer){map.removeLayer(ndviLayer);ndviLayer=null;}
   if(l==='indice'){
     const label = INDICES[curIndice] || curIndice;
-    ndviLayer = await buildNDVILayer(curDate);
+    ndviLayer = buildNDVILayer(curDate);
     ndviLayer.addTo(map);
     toast('✓ '+label+' cargado','ok');
   }
@@ -351,7 +357,7 @@ async function onDate(d){
   if(selLot)showSpark(selLot);
   if(curLayer==='indice'){
     if(ndviLayer){map.removeLayer(ndviLayer);ndviLayer=null;}
-    ndviLayer=await buildNDVILayer(d);
+    ndviLayer=buildNDVILayer(d);
     ndviLayer.addTo(map);
     toast('✓ '+( INDICES[curIndice]||curIndice)+' actualizado','ok');
   }
@@ -362,7 +368,7 @@ async function onIndice(ind) {
   curIndice = ind;
   if (curLayer === 'indice') {
     if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
-    ndviLayer = await buildNDVILayer(curDate);
+    ndviLayer = buildNDVILayer(curDate);
     ndviLayer.addTo(map);
     toast('✓ ' + INDICES[ind], 'ok');
   }
