@@ -3,12 +3,15 @@ exports.handler = async (event, context) => {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: cors, body: '' };
   }
+
   try {
     const payload = JSON.parse(event.body);
     const { bbox, time, width, height, layer } = payload;
+
     const tokenRes = await fetch('https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -19,12 +22,9 @@ exports.handler = async (event, context) => {
       }),
     });
     const tokenData = await tokenRes.json();
-    return {
-      statusCode: 200,
-      headers: cors,
-      body: JSON.stringify({ ok: true, layer: layer || 'NDVI' }),
-    };
-  } catch (e) {
-    return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: e.message }) };
-  }
-};
+    const token = tokenData.access_token;
+
+    const wmsUrl = new URL('https://sh.dataspace.copernicus.eu/ogc/wms/dbd04f79-bcc0-404f-b901-1a1b7ff53e28');
+    wmsUrl.searchParams.set('SERVICE', 'WMS');
+    wmsUrl.searchParams.set('REQUEST', 'GetMap');
+    wmsUrl.
