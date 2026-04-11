@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
     const wmsUrl = new URL('https://sh.dataspace.copernicus.eu/ogc/wms/dbd04f79-bcc0-404f-b901-1a1b7ff53e28');
     wmsUrl.searchParams.set('SERVICE', 'WMS');
     wmsUrl.searchParams.set('REQUEST', 'GetMap');
-    wmsUrl.searchParams.set('LAYERS', 'NDVI');
+    wmsUrl.searchParams.set('LAYERS', body.layer || 'NDVI');
     wmsUrl.searchParams.set('BBOX', bbox);
     wmsUrl.searchParams.set('WIDTH', width || 512);
     wmsUrl.searchParams.set('HEIGHT', height || 512);
