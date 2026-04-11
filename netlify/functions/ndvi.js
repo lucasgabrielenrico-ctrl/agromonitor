@@ -9,9 +9,9 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { bbox, time, width, height } = JSON.parse(event.body);
+    const payload = JSON.parse(event.body);
+    const { bbox, time, width, height, layer } = payload;
 
-    // Obtener token
     const tokenRes = await fetch('https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -24,11 +24,10 @@ exports.handler = async (event, context) => {
     const tokenData = await tokenRes.json();
     const token = tokenData.access_token;
 
-    // WMS request con token
     const wmsUrl = new URL('https://sh.dataspace.copernicus.eu/ogc/wms/dbd04f79-bcc0-404f-b901-1a1b7ff53e28');
     wmsUrl.searchParams.set('SERVICE', 'WMS');
     wmsUrl.searchParams.set('REQUEST', 'GetMap');
-    wmsUrl.searchParams.set('LAYERS', body.layer || 'NDVI');
+    wmsUrl.searchParams.set('LAYERS', layer || 'NDVI');
     wmsUrl.searchParams.set('BBOX', bbox);
     wmsUrl.searchParams.set('WIDTH', width || 512);
     wmsUrl.searchParams.set('HEIGHT', height || 512);
@@ -44,19 +43,4 @@ exports.handler = async (event, context) => {
 
     if (!wmsRes.ok) {
       const err = await wmsRes.text();
-      return { statusCode: wmsRes.status, headers: cors, body: err };
-    }
-
-    const buffer = await wmsRes.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-
-    return {
-      statusCode: 200,
-      headers: { ...cors, 'Content-Type': 'image/png' },
-      body: base64,
-      isBase64Encoded: true,
-    };
-  } catch (e) {
-    return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
-  }
-};
+      return { statusCode: wms
