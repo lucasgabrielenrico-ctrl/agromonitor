@@ -97,15 +97,37 @@ body{font-family:var(--font);height:100vh;display:flex;flex-direction:column;ove
   <div class="sep"></div>
   <span class="tb-label">Capa</span>
   <button class="lbtn on" onclick="setLayer('sat',this)">Satélite</button>
-  <button class="lbtn" onclick="setLayer('ndvi',this)">NDVI</button>
+  <button class="lbtn" onclick="setLayer('indice',this)">Índice</button>
+  <div class="sep"></div>
+  <span class="tb-label">Índice</span>
+  <select id="indice-sel" onchange="onIndice(this.value)">
+    <option value="NDVI">NDVI — Vegetación</option>
+    <option value="NDWI">NDWI — Agua</option>
+    <option value="MOISTURE-INDEX">Humedad suelo</option>
+    <option value="FALSE-COLOR">Falso color</option>
+    <option value="AGRICULTURE">Agricultura</option>
+  </select>
   <div class="sep"></div>
   <span class="tb-label">Fecha</span>
   <select id="date-sel" onchange="onDate(this.value)">
-    <option value="2025-03-15">15 Mar 2025</option>
-    <option value="2025-02-15" selected>15 Feb 2025</option>
-    <option value="2025-01-10">10 Ene 2025</option>
-    <option value="2024-12-01">01 Dic 2024</option>
-    <option value="2024-11-01">01 Nov 2024</option>
+    <option value="2025-03-15">Mar 2025</option>
+    <option value="2025-02-15" selected>Feb 2025</option>
+    <option value="2025-01-10">Ene 2025</option>
+    <option value="2024-12-01">Dic 2024</option>
+    <option value="2024-11-01">Nov 2024</option>
+    <option value="2024-10-01">Oct 2024</option>
+    <option value="2024-09-01">Sep 2024</option>
+    <option value="2024-08-01">Ago 2024</option>
+    <option value="2024-07-01">Jul 2024</option>
+    <option value="2024-06-01">Jun 2024</option>
+    <option value="2024-05-01">May 2024</option>
+    <option value="2024-04-01">Abr 2024</option>
+    <option value="2024-03-01">Mar 2024</option>
+    <option value="2024-02-01">Feb 2024</option>
+    <option value="2024-01-01">Ene 2024</option>
+    <option value="2023-12-01">Dic 2023</option>
+    <option value="2023-11-01">Nov 2023</option>
+    <option value="2023-10-01">Oct 2023</option>
   </select>
   <div class="sep"></div>
   <button id="btn-kmz" onclick="document.getElementById('kmz-input').click()">+ KMZ</button>
@@ -169,17 +191,26 @@ const LOTS = [
   }
 ];
 
-const DATES   = ['2025-03-15','2025-02-15','2025-01-10','2024-12-01','2024-11-01'];
-const DLABELS = ['15 Mar','15 Feb','10 Ene','01 Dic','01 Nov'];
-const WMS_DATES = {
-  '2025-03-15':'2025-03-10/2025-03-20',
-  '2025-02-15':'2025-02-10/2025-02-20',
-  '2025-01-10':'2025-01-05/2025-01-15',
-  '2024-12-01':'2024-11-25/2024-12-05',
-  '2024-11-01':'2024-10-27/2024-11-05'
+const DATES   = ['2025-03-15','2025-02-15','2025-01-10','2024-12-01','2024-11-01','2024-10-01','2024-09-01','2024-08-01','2024-07-01','2024-06-01','2024-05-01','2024-04-01','2024-03-01','2024-02-01','2024-01-01','2023-12-01','2023-11-01','2023-10-01'];
+const DLABELS = ['Mar25','Feb25','Ene25','Dic24','Nov24','Oct24','Sep24','Ago24','Jul24','Jun24','May24','Abr24','Mar24','Feb24','Ene24','Dic23','Nov23','Oct23'];
+
+// Genera rango de 10 dias centrado en la fecha
+function dateToWMS(d) {
+  const dt = new Date(d);
+  const from = new Date(dt); from.setDate(dt.getDate()-5);
+  const to   = new Date(dt); to.setDate(dt.getDate()+5);
+  return from.toISOString().slice(0,10)+'/'+to.toISOString().slice(0,10);
+}
+
+const INDICES = {
+  'NDVI': 'NDVI — Vegetación',
+  'NDWI': 'NDWI — Agua superficial',
+  'MOISTURE-INDEX': 'Humedad de suelo',
+  'FALSE-COLOR': 'Falso color vegetación',
+  'AGRICULTURE': 'Agricultura'
 };
 
-let map, polys={}, selLot=null, curLayer='sat', curDate='2025-02-15';
+let map, polys={}, selLot=null, curLayer='sat', curDate='2025-02-15', curIndice='NDVI';
 let satLayer, ndviLayer=null, recognition=null, isRec=false;
 let shToken=null, tokenExpiry=0;
 
@@ -205,7 +236,7 @@ async function getSHToken() {
 async function buildNDVILayer(date) {
   const mapBounds = map.getBounds();
   const size = map.getSize();
-  const period = WMS_DATES[date] || '2025-02-10/2025-02-20';
+  const period = dateToWMS(date);
   const w = Math.min(Math.round(size.x), 512);
   const h = Math.min(Math.round(size.y), 512);
   const bbox = mapBounds.getSouth()+','+mapBounds.getWest()+','+mapBounds.getNorth()+','+mapBounds.getEast();
@@ -215,7 +246,7 @@ async function buildNDVILayer(date) {
     const resp = await fetch('/.netlify/functions/ndvi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bbox, time: period, width: w, height: h })
+      body: JSON.stringify({ bbox, time: period, width: w, height: h, layer: curIndice })
     });
     document.getElementById('ndvi-loading').style.display = 'none';
     if (!resp.ok) {
@@ -321,12 +352,13 @@ async function setLayer(l,btn){
   curLayer=l;
   document.querySelectorAll('.lbtn').forEach(b=>b.classList.toggle('on',b===btn));
   if(ndviLayer){map.removeLayer(ndviLayer);ndviLayer=null;}
-  if(l==='ndvi'){
-    toast('Descargando NDVI Sentinel-2...','info');
+  if(l==='indice'){
+    const label = INDICES[curIndice] || curIndice;
+    toast('Cargando '+label+'...','info');
     ndviLayer=await buildNDVILayer(curDate);
     if(ndviLayer){
       ndviLayer.addTo(map);
-      toast('✓ NDVI Sentinel-2 cargado','ok');
+      toast('✓ '+label+' cargado','ok');
     }
   }
   renderPolys();
@@ -335,11 +367,22 @@ async function setLayer(l,btn){
 async function onDate(d){
   curDate=d;renderList();renderPolys();
   if(selLot)showSpark(selLot);
-  if(curLayer==='ndvi'){
+  if(curLayer==='indice'){
     if(ndviLayer){map.removeLayer(ndviLayer);ndviLayer=null;}
     toast('Actualizando NDVI...','info');
     ndviLayer=await buildNDVILayer(d);
     if(ndviLayer){ndviLayer.addTo(map);toast('✓ NDVI actualizado','ok');}
+  }
+}
+
+// ─── CAMBIO DE ÍNDICE ────────────────────────────────────────────────────────
+async function onIndice(ind) {
+  curIndice = ind;
+  if (curLayer === 'indice') {
+    if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
+    toast('Cargando ' + INDICES[ind] + '...', 'info');
+    ndviLayer = await buildNDVILayer(curDate);
+    if (ndviLayer) { ndviLayer.addTo(map); toast('✓ ' + INDICES[ind], 'ok'); }
   }
 }
 
