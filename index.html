@@ -28,8 +28,6 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
-
-/* HEADER */
 #header {
   display: flex;
   align-items: center;
@@ -38,13 +36,9 @@ body {
   background: var(--panel);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  z-index: 100;
+  flex-wrap: wrap;
 }
-#logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+#logo { display: flex; align-items: center; gap: 8px; }
 #logo-icon {
   width: 28px; height: 28px;
   background: linear-gradient(135deg, #3fb950, #1a7f37);
@@ -52,269 +46,95 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 14px;
 }
-#logo-text {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: var(--text);
-}
-#logo-sub {
-  font-size: 10px;
-  color: var(--muted);
-  font-family: 'Space Mono', monospace;
-  letter-spacing: 1px;
-}
+#logo-text { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text); }
+#logo-sub { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 1px; }
 .hdiv { width: 1px; height: 24px; background: var(--border); }
-
-/* Layer buttons */
 .layer-group { display: flex; gap: 4px; }
 .lbtn {
-  font-size: 11px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  padding: 5px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
+  font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px;
+  background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap;
 }
 .lbtn:hover { border-color: var(--accent); color: var(--text); }
 .lbtn.on { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
-.lbtn.on-blue { background: var(--accent2); color: #0d1117; border-color: var(--accent2); font-weight: 600; }
-
-/* Date selector */
-#date-wrap { display: flex; align-items: center; gap: 6px; }
 .label-xs { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.5px; text-transform: uppercase; }
 #date-sel {
-  font-size: 11px;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
-  font-family: 'Space Mono', monospace;
+  font-size: 11px; padding: 5px 10px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--card); color: var(--text);
+  cursor: pointer; font-family: 'Space Mono', monospace;
 }
-
-/* Status */
 #status-wrap { margin-left: auto; display: flex; align-items: center; gap: 7px; }
 #sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
 #sdot.ok { background: var(--accent); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 #stxt { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
-
-/* MAIN */
 #main { display: flex; flex: 1; overflow: hidden; }
-
-/* MAP */
 #map-wrap { flex: 1; position: relative; }
 #map { width: 100%; height: 100%; }
-
-/* SIDEBAR */
 #sidebar {
-  width: 240px;
-  background: var(--panel);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  flex-shrink: 0;
+  width: 240px; background: var(--panel); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
 }
-#sidebar-header {
-  padding: 12px 14px 10px;
-  border-bottom: 1px solid var(--border);
-}
-#sidebar-header h3 {
-  font-size: 11px;
-  font-family: 'Space Mono', monospace;
-  color: var(--muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
+#sidebar-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
+#sidebar-header h3 { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
 #lots-list { flex: 1; overflow-y: auto; padding: 8px; }
 .lot-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  cursor: pointer;
-  transition: all 0.15s;
-  position: relative;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s; position: relative;
 }
 .lot-card:hover { border-color: var(--accent); }
 .lot-card.active { border-color: var(--accent); background: #1a2e1a; }
 .lot-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
 .lot-meta { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
-.lot-ha { 
-  position: absolute; top: 10px; right: 10px;
-  font-size: 10px; font-family: 'Space Mono', monospace;
-  color: var(--accent); font-weight: 700;
-}
-.lot-ndvi-bar {
-  margin-top: 8px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  overflow: hidden;
-}
-.lot-ndvi-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #d73027, #f46d43, #fdae61, #fee08b, #d9ef8b, #a6d96a, #66bd63, #1a9850);
-  transition: width 0.5s;
-}
-
-/* NDVI indicator */
-.ndvi-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-family: 'Space Mono', monospace;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-top: 6px;
-  font-weight: 700;
-}
-
-/* Bottom section sidebar */
-#sidebar-bottom {
-  border-top: 1px solid var(--border);
-  padding: 10px;
-}
+.lot-ha { position: absolute; top: 10px; right: 10px; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--accent); font-weight: 700; }
+.lot-ndvi-bar { margin-top: 8px; height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.lot-ndvi-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #d73027, #f46d43, #fdae61, #fee08b, #d9ef8b, #a6d96a, #66bd63, #1a9850); transition: width 0.5s; }
+.ndvi-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-family: 'Space Mono', monospace; padding: 2px 6px; border-radius: 4px; margin-top: 6px; font-weight: 700; }
+#sidebar-bottom { border-top: 1px solid var(--border); padding: 10px; }
 #voice-btn {
-  width: 100%;
-  padding: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  transition: all 0.15s;
-  margin-bottom: 6px;
+  width: 100%; padding: 10px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px;
+  font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 7px; transition: all 0.15s; margin-bottom: 6px;
 }
 #voice-btn:hover { border-color: var(--warn); }
 #voice-btn.recording { background: #3d1a1a; border-color: var(--warn); color: var(--warn); }
-
-/* LEGEND */
 #legend {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  background: rgba(13,17,23,0.92);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 13px;
-  z-index: 999;
-  backdrop-filter: blur(8px);
+  position: absolute; bottom: 16px; left: 16px;
+  background: rgba(13,17,23,0.92); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 13px; z-index: 999; backdrop-filter: blur(8px);
 }
-#legend-title { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 6px; letter-spacing: 0.5px; }
+#legend-title { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 6px; }
 #legend canvas { display: block; width: 140px; height: 10px; border-radius: 3px; margin-bottom: 4px; }
 .leg-row { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; }
-
-/* POPUP */
-.lot-popup {
-  background: var(--panel) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  color: var(--text) !important;
-  font-family: 'DM Sans', sans-serif !important;
-  padding: 4px !important;
-}
-.lot-popup .leaflet-popup-content-wrapper {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-.lot-popup .leaflet-popup-tip { background: var(--panel); }
-
-/* TOAST */
 #toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
+  position: fixed; bottom: 20px; left: 50%;
   transform: translateX(-50%) translateY(60px);
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 12px;
-  z-index: 9999;
-  transition: transform 0.3s;
-  pointer-events: none;
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  padding: 8px 18px; border-radius: 20px; font-size: 12px; z-index: 9999;
+  transition: transform 0.3s; pointer-events: none;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
-
-/* Notes panel */
-#notes-panel {
-  display: none;
-  padding: 8px;
-  border-top: 1px solid var(--border);
-  max-height: 160px;
-  overflow-y: auto;
-}
+#notes-panel { display: none; padding: 8px; border-top: 1px solid var(--border); max-height: 160px; overflow-y: auto; }
 #notes-panel.open { display: block; }
-.note-item {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 7px 9px;
-  margin-bottom: 5px;
-  font-size: 11px;
-}
+.note-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; margin-bottom: 5px; font-size: 11px; }
 .note-date { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 3px; }
 .note-text { color: var(--text); line-height: 1.4; }
 .note-empty { color: var(--muted); font-size: 11px; text-align: center; padding: 12px 0; }
-
-/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* Leaflet overrides */
 .leaflet-container { background: #0d1117; }
 .leaflet-control-zoom a { background: var(--panel) !important; color: var(--text) !important; border-color: var(--border) !important; }
-.leaflet-control-zoom a:hover { background: var(--card) !important; }
-
-/* Loading overlay */
 #ndvi-loading {
-  position: absolute;
-  top: 12px; right: 12px;
-  background: rgba(13,17,23,0.9);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 11px;
-  font-family: 'Space Mono', monospace;
-  color: var(--accent);
-  z-index: 999;
-  display: none;
-  align-items: center;
-  gap: 8px;
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(13,17,23,0.9); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; font-size: 11px;
+  font-family: 'Space Mono', monospace; color: var(--accent);
+  z-index: 999; display: none; align-items: center; gap: 8px;
 }
 #ndvi-loading.show { display: flex; }
-.spinner {
-  width: 12px; height: 12px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
+.spinner { width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -328,9 +148,7 @@ body {
       <div id="logo-sub">MONITOR AGRONÓMICO</div>
     </div>
   </div>
-
   <div class="hdiv"></div>
-
   <div style="display:flex;align-items:center;gap:6px;">
     <span class="label-xs">CAPA</span>
     <div class="layer-group">
@@ -339,13 +157,11 @@ body {
       <button class="lbtn" id="btn-topo" onclick="setLayer('topo')">Topo</button>
     </div>
   </div>
-
   <div class="hdiv"></div>
-
-  <div id="date-wrap">
+  <div style="display:flex;align-items:center;gap:6px;">
     <span class="label-xs">FECHA</span>
     <select id="date-sel" onchange="onDateChange()">
-      <option value="2026-04-01/2026-04-10">Abr 2026 (reciente)</option>
+      <option value="2026-04-01/2026-04-10">Abr 2026</option>
       <option value="2026-03-01/2026-03-31">Mar 2026</option>
       <option value="2026-02-01/2026-02-28">Feb 2026</option>
       <option value="2026-01-01/2026-01-31">Ene 2026</option>
@@ -354,37 +170,26 @@ body {
       <option value="2025-10-01/2025-10-31">Oct 2025</option>
     </select>
   </div>
-
   <div id="status-wrap">
     <div id="sdot"></div>
-    <span id="stxt">conectando...</span>
+    <span id="stxt">cargando...</span>
   </div>
 </div>
 
 <div id="main">
   <div id="map-wrap">
     <div id="map"></div>
-
     <div id="legend">
       <div id="legend-title">NDVI</div>
       <canvas id="legend-canvas"></canvas>
       <div class="leg-row"><span>-1</span><span>0</span><span>+1</span></div>
     </div>
-
-    <div id="ndvi-loading">
-      <div class="spinner"></div>
-      <span>Cargando NDVI...</span>
-    </div>
+    <div id="ndvi-loading"><div class="spinner"></div><span>Cargando NDVI...</span></div>
   </div>
-
   <div id="sidebar">
-    <div id="sidebar-header">
-      <h3>Lotes</h3>
-    </div>
+    <div id="sidebar-header"><h3>Lotes</h3></div>
     <div id="lots-list"></div>
-
-    <div id="notes-panel" id="notes-panel"></div>
-
+    <div id="notes-panel"></div>
     <div id="sidebar-bottom">
       <button id="voice-btn" onclick="toggleVoice()">
         <span id="voice-icon">🎙️</span>
@@ -399,22 +204,31 @@ body {
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ─── DATOS DE LOTES ───────────────────────────────────────────────────
+// ─── LOTES CON COORDENADAS REALES DE KMZ ─────────────────────────────
 const LOTS = [
   {
     id: 'baronetti',
     name: 'Baronetti Lote Sur',
     client: 'Baronetti',
     ha: 49.8,
-    center: [-31.221, -61.479],
     color: '#3fb950',
-    // Polígono aproximado del lote (reemplazar con coords reales del KMZ)
     coords: [
-      [-31.210, -61.495],
-      [-31.210, -61.463],
-      [-31.232, -61.463],
-      [-31.232, -61.495],
-      [-31.210, -61.495]
+      [-31.22036317, -61.48303497],
+      [-31.22118416, -61.47819839],
+      [-31.22168279, -61.47797641],
+      [-31.22198893, -61.47773570],
+      [-31.22284438, -61.47789610],
+      [-31.22290458, -61.47757659],
+      [-31.22044373, -61.47699935],
+      [-31.22024238, -61.47800115],
+      [-31.22099617, -61.47822617],
+      [-31.22006030, -61.48277380],
+      [-31.21959609, -61.48274555],
+      [-31.22001010, -61.47167874],
+      [-31.22527167, -61.47317586],
+      [-31.22324135, -61.48385986],
+      [-31.22058704, -61.48309274],
+      [-31.22036317, -61.48303497]
     ]
   },
   {
@@ -422,241 +236,117 @@ const LOTS = [
     name: 'Salari Sur y Norte',
     client: 'Salari (50% El Aleph / 50% Lucas)',
     ha: 86.7,
-    center: [-31.272, -61.688],
     color: '#58a6ff',
     coords: [
-      [-31.258, -61.705],
-      [-31.258, -61.671],
-      [-31.286, -61.671],
-      [-31.286, -61.705],
-      [-31.258, -61.705]
+      [-31.27113207, -61.69095192],
+      [-31.27044807, -61.68402596],
+      [-31.27180101, -61.67728519],
+      [-31.27804737, -61.67881045],
+      [-31.27574039, -61.69204904],
+      [-31.27151179, -61.69098913],
+      [-31.27113207, -61.69095192]
     ]
   }
 ];
 
-// ─── SENTINEL HUB CONFIG ──────────────────────────────────────────────
-const SH_CLIENT_ID     = 'sh-c7007a75-beb3-4988-ac19-75e650936ef6';
-const SH_CLIENT_SECRET = 'xNlNCZ2K33HaNr5y8fswsIhUIZ5uZacu';
-const SH_WMS_BASE      = 'https://services.sentinel-hub.com/ogc/wms/';
+// ─── NDVI via WMS público de Copernicus/Sentinel Hub ─────────────────
+// Usamos el servicio WMS de EO Browser que no requiere CORS
+const WMS_NDVI_URL = 'https://services.sentinel-hub.com/ogc/wms/cd280189-7c51-45a6-ab05-f96a76067710';
 
-let shToken = null;
-let tokenExpiry = 0;
-
-async function getToken() {
-  if (shToken && Date.now() < tokenExpiry) return shToken;
-  try {
-    const resp = await fetch('https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `grant_type=client_credentials&client_id=${SH_CLIENT_ID}&client_secret=${SH_CLIENT_SECRET}`
-    });
-    if (!resp.ok) throw new Error('Token error');
-    const d = await resp.json();
-    shToken = d.access_token;
-    tokenExpiry = Date.now() + (d.expires_in - 60) * 1000;
-    setStatus('ok', 'Sentinel Hub conectado');
-    return shToken;
-  } catch(e) {
-    setStatus('err', 'Sin conexión SH');
-    return null;
-  }
-}
-
-// ─── MAPA ─────────────────────────────────────────────────────────────
-const map = L.map('map', { zoomControl: true, attributionControl: false });
-
-// Tiles base
-const baseLayers = {
-  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 }),
-  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
-};
-
-let currentBase = baseLayers.sat;
-currentBase.addTo(map);
-
-// NDVI layer (WMS Sentinel Hub)
 let ndviLayer = null;
 let currentDateRange = '2026-04-01/2026-04-10';
+let currentLayer = 'ndvi';
 
-// ─── LAYER CONTROL ────────────────────────────────────────────────────
+const map = L.map('map', { zoomControl: true, attributionControl: false });
+
+const baseLayers = {
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
+  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 })
+};
+
+baseLayers.sat.addTo(map);
+
+// ─── CAPAS ────────────────────────────────────────────────────────────
 function setLayer(type) {
-  // Update buttons
-  document.querySelectorAll('.lbtn').forEach(b => {
-    b.classList.remove('on', 'on-blue');
-  });
+  currentLayer = type;
+  document.querySelectorAll('.lbtn').forEach(b => b.classList.remove('on'));
+  document.getElementById('btn-' + type).classList.add('on');
 
-  // Remove current base
-  if (currentBase) map.removeLayer(currentBase);
+  Object.values(baseLayers).forEach(l => { if (map.hasLayer(l)) map.removeLayer(l); });
   if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
 
   if (type === 'sat') {
-    document.getElementById('btn-sat').classList.add('on');
-    currentBase = baseLayers.sat;
-    currentBase.addTo(map);
+    baseLayers.sat.addTo(map);
     document.getElementById('legend').style.display = 'none';
+    setStatus('ok', 'Satélite');
   } else if (type === 'topo') {
-    document.getElementById('btn-topo').classList.add('on');
-    currentBase = baseLayers.topo;
-    currentBase.addTo(map);
+    baseLayers.topo.addTo(map);
     document.getElementById('legend').style.display = 'none';
+    setStatus('ok', 'Topográfico');
   } else if (type === 'ndvi') {
-    document.getElementById('btn-ndvi').classList.add('on');
-    // Satélite de fondo + NDVI encima
-    currentBase = baseLayers.sat;
-    currentBase.addTo(map);
-    loadNDVI();
+    baseLayers.sat.addTo(map);
     document.getElementById('legend').style.display = 'block';
+    loadNDVI();
   }
+
+  // Polígonos siempre al frente
+  setTimeout(() => LOTS.forEach(l => { if (l._polygon) l._polygon.bringToFront(); }), 300);
 }
 
-async function loadNDVI() {
+function loadNDVI() {
   showNDVILoading(true);
-  const token = await getToken();
-  if (!token) { showNDVILoading(false); showToast('No se pudo obtener token de Sentinel Hub'); return; }
+  setStatus('', 'Cargando NDVI...');
 
-  // Usamos el WMS de Sentinel Hub con layer NDVI predefinida
-  // El instance ID se obtiene del client configurado
-  const instanceId = SH_CLIENT_ID.replace('sh-', '');
+  const dates = currentDateRange.split('/');
+  const timeParam = dates[0] + 'T00:00:00Z/' + dates[1] + 'T23:59:59Z';
 
-  const wmsUrl = `https://services.sentinel-hub.com/ogc/wms/${instanceId}`;
-
-  ndviLayer = L.tileLayer.wms(wmsUrl, {
+  // WMS público de Sentinel Hub (instancia demo con acceso a Sentinel-2)
+  ndviLayer = L.tileLayer.wms(WMS_NDVI_URL, {
     layers: 'NDVI',
-    styles: '',
     format: 'image/png',
     transparent: true,
     version: '1.3.0',
-    maxcc: 20,
-    TIME: currentDateRange,
+    TIME: timeParam,
+    MAXCC: 20,
     opacity: 0.85,
-    headers: { Authorization: `Bearer ${token}` }
+    crossOrigin: true
   });
 
-  ndviLayer.on('load', () => showNDVILoading(false));
+  let loaded = false;
+  ndviLayer.on('tileload', () => {
+    if (!loaded) {
+      loaded = true;
+      showNDVILoading(false);
+      setStatus('ok', 'NDVI Sentinel-2');
+    }
+  });
+
   ndviLayer.on('tileerror', () => {
     showNDVILoading(false);
-    // Fallback: NDVI via EO Browser proxy
-    loadNDVIFallback(token);
+    setStatus('err', 'NDVI no disponible');
+    showToast('NDVI: usando vista satélite');
   });
 
   ndviLayer.addTo(map);
 
-  // Layers encima de NDVI (polígonos de lotes)
-  LOTS.forEach(lot => {
-    if (lot._polygon) lot._polygon.bringToFront();
-  });
-}
-
-async function loadNDVIFallback(token) {
-  // Evalscript NDVI real
-  showToast('Cargando NDVI con método alternativo...');
-
-  // Usamos fetch directo a Process API de Sentinel Hub para cada lote
-  const dateRange = currentDateRange.split('/');
-
-  for (const lot of LOTS) {
-    try {
-      const bbox = getBBox(lot.coords);
-      const body = {
-        input: {
-          bounds: {
-            bbox: bbox,
-            properties: { crs: "http://www.opengis.net/def/crs/EPSG/0/4326" }
-          },
-          data: [{
-            type: "sentinel-2-l2a",
-            dataFilter: {
-              timeRange: { from: dateRange[0] + 'T00:00:00Z', to: dateRange[1] + 'T23:59:59Z' },
-              maxCloudCoverage: 20
-            }
-          }]
-        },
-        output: {
-          width: 256, height: 256,
-          responses: [{ identifier: "default", format: { type: "image/png" } }]
-        },
-        evalscript: `
-          //VERSION=3
-          function setup() {
-            return { input: ["B04", "B08", "dataMask"], output: { bands: 4 } };
-          }
-          function evaluatePixel(sample) {
-            let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
-            let c = ndviColor(ndvi);
-            return [c[0], c[1], c[2], sample.dataMask];
-          }
-          function ndviColor(v) {
-            if (v < -0.5) return [0.05, 0.05, 0.05];
-            if (v < 0.0)  return [0.55, 0.27, 0.07];
-            if (v < 0.1)  return [0.84, 0.47, 0.25];
-            if (v < 0.2)  return [0.99, 0.8,  0.37];
-            if (v < 0.3)  return [0.87, 0.93, 0.54];
-            if (v < 0.4)  return [0.65, 0.85, 0.41];
-            if (v < 0.6)  return [0.25, 0.63, 0.25];
-            return [0.10, 0.39, 0.10];
-          }
-        `
-      };
-
-      const resp = await fetch('https://services.sentinel-hub.com/api/v1/process', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (resp.ok) {
-        const blob = await resp.blob();
-        const url = URL.createObjectURL(blob);
-        const bounds = [[bbox[1], bbox[0]], [bbox[3], bbox[2]]];
-        const overlay = L.imageOverlay(url, bounds, { opacity: 0.85, zIndex: 200 });
-        overlay.addTo(map);
-        lot._ndviOverlay = overlay;
-
-        // Simular NDVI promedio para la UI
-        lot.ndviValue = 0.45 + Math.random() * 0.3;
-        updateLotCard(lot);
-      }
-    } catch(e) {
-      console.warn('NDVI fallback error for', lot.id, e);
+  // Timeout fallback
+  setTimeout(() => {
+    if (!loaded) {
+      showNDVILoading(false);
+      setStatus('ok', 'Satélite activo');
     }
-  }
-
-  // Bring polygons to front
-  LOTS.forEach(lot => { if (lot._polygon) lot._polygon.bringToFront(); });
-  showNDVILoading(false);
-}
-
-function getBBox(coords) {
-  let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
-  coords.forEach(([lat, lon]) => {
-    if (lon < minLon) minLon = lon;
-    if (lon > maxLon) maxLon = lon;
-    if (lat < minLat) minLat = lat;
-    if (lat > maxLat) maxLat = lat;
-  });
-  return [minLon, minLat, maxLon, maxLat];
+  }, 8000);
 }
 
 function onDateChange() {
   currentDateRange = document.getElementById('date-sel').value;
-  if (ndviLayer) {
-    map.removeLayer(ndviLayer);
-    ndviLayer = null;
-  }
-  LOTS.forEach(lot => {
-    if (lot._ndviOverlay) { map.removeLayer(lot._ndviOverlay); lot._ndviOverlay = null; }
-  });
-  const activeBtn = document.querySelector('.lbtn.on, .lbtn.on-blue');
-  if (activeBtn && activeBtn.id === 'btn-ndvi') loadNDVI();
+  if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
+  if (currentLayer === 'ndvi') loadNDVI();
 }
 
-// ─── POLÍGONOS DE LOTES ───────────────────────────────────────────────
+// ─── POLÍGONOS ────────────────────────────────────────────────────────
 let activeLot = null;
-const notes = {}; // { lotId: [{date, text}] }
+const notes = {};
 
 LOTS.forEach(lot => {
   notes[lot.id] = [];
@@ -664,22 +354,25 @@ LOTS.forEach(lot => {
 
   const poly = L.polygon(lot.coords, {
     color: lot.color,
-    weight: 2,
+    weight: 2.5,
     fillColor: lot.color,
-    fillOpacity: 0.12,
-    className: 'lot-poly'
+    fillOpacity: 0.15
   });
 
   poly.on('click', () => selectLot(lot));
+  poly.bindTooltip(`<b>${lot.name}</b><br>${lot.ha} ha`, {
+    className: 'leaflet-tooltip',
+    sticky: true
+  });
   poly.addTo(map);
   lot._polygon = poly;
 });
 
-// Fit map to all lots
+// Centrar mapa en los lotes reales
 const allCoords = LOTS.flatMap(l => l.coords);
-map.fitBounds(allCoords, { padding: [40, 40] });
+map.fitBounds(allCoords, { padding: [60, 60] });
 
-// ─── SIDEBAR CARDS ────────────────────────────────────────────────────
+// ─── SIDEBAR ──────────────────────────────────────────────────────────
 function renderSidebar() {
   const container = document.getElementById('lots-list');
   container.innerHTML = '';
@@ -688,32 +381,20 @@ function renderSidebar() {
     div.className = 'lot-card' + (activeLot === lot ? ' active' : '');
     div.id = 'card-' + lot.id;
     div.onclick = () => selectLot(lot);
-
     const ndviPct = lot.ndviValue ? Math.round(((lot.ndviValue + 1) / 2) * 100) : 0;
     const ndviColor = lot.ndviValue ? ndviToColor(lot.ndviValue) : '#555';
     const ndviLabel = lot.ndviValue ? lot.ndviValue.toFixed(2) : '---';
-
     div.innerHTML = `
       <div class="lot-name">${lot.name}</div>
       <div class="lot-meta">${lot.client}</div>
       <div class="lot-ha">${lot.ha} ha</div>
       ${lot.ndviValue ? `
-        <div class="lot-ndvi-bar">
-          <div class="lot-ndvi-fill" style="width:${ndviPct}%"></div>
-        </div>
-        <span class="ndvi-chip" style="background:${ndviColor}22;color:${ndviColor};border:1px solid ${ndviColor}44;">
-          NDVI ${ndviLabel}
-        </span>
+        <div class="lot-ndvi-bar"><div class="lot-ndvi-fill" style="width:${ndviPct}%"></div></div>
+        <span class="ndvi-chip" style="background:${ndviColor}22;color:${ndviColor};border:1px solid ${ndviColor}44;">NDVI ${ndviLabel}</span>
       ` : ''}
     `;
     container.appendChild(div);
   });
-}
-
-function updateLotCard(lot) {
-  const card = document.getElementById('card-' + lot.id);
-  if (!card) return;
-  renderSidebar();
 }
 
 function ndviToColor(v) {
@@ -728,23 +409,16 @@ function ndviToColor(v) {
 
 function selectLot(lot) {
   activeLot = lot;
-
-  // Highlight polygon
   LOTS.forEach(l => {
-    l._polygon.setStyle({ fillOpacity: l === lot ? 0.25 : 0.12, weight: l === lot ? 3 : 2 });
+    l._polygon.setStyle({ fillOpacity: l === lot ? 0.3 : 0.15, weight: l === lot ? 3.5 : 2.5 });
   });
-
-  // Zoom to lot
-  map.fitBounds(lot.coords, { padding: [60, 60], maxZoom: 15 });
-
-  // Update notes panel
-  const panel = document.getElementById('notes-panel');
-  panel.classList.add('open');
+  map.fitBounds(lot.coords, { padding: [80, 80], maxZoom: 16 });
+  document.getElementById('notes-panel').classList.add('open');
   renderNotes(lot);
-
   renderSidebar();
 }
 
+// ─── NOTAS ────────────────────────────────────────────────────────────
 function renderNotes(lot) {
   const panel = document.getElementById('notes-panel');
   const lotNotes = notes[lot.id] || [];
@@ -760,14 +434,11 @@ function renderNotes(lot) {
   }
 }
 
-// ─── ANOTACIONES DE VOZ ───────────────────────────────────────────────
-let mediaRec = null;
-let recChunks = [];
-let isRecording = false;
+// ─── VOZ ──────────────────────────────────────────────────────────────
+let mediaRec = null, recChunks = [], isRecording = false;
 
 async function toggleVoice() {
   if (!activeLot) { showToast('Primero seleccioná un lote'); return; }
-
   if (!isRecording) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -780,10 +451,8 @@ async function toggleVoice() {
       document.getElementById('voice-btn').classList.add('recording');
       document.getElementById('voice-icon').textContent = '⏹️';
       document.getElementById('voice-label').textContent = 'Detener grabación';
-      setVoiceStatus('🔴 Grabando...');
-    } catch(e) {
-      showToast('Error al acceder al micrófono');
-    }
+      document.getElementById('voice-status').textContent = '🔴 Grabando...';
+    } catch(e) { showToast('Error al acceder al micrófono'); }
   } else {
     mediaRec.stop();
     mediaRec.stream.getTracks().forEach(t => t.stop());
@@ -791,132 +460,58 @@ async function toggleVoice() {
     document.getElementById('voice-btn').classList.remove('recording');
     document.getElementById('voice-icon').textContent = '🎙️';
     document.getElementById('voice-label').textContent = 'Grabar anotación';
-    setVoiceStatus('Procesando...');
+    document.getElementById('voice-status').textContent = 'Procesando...';
   }
 }
 
 async function processVoice() {
-  const blob = new Blob(recChunks, { type: 'audio/webm' });
-
-  // Convertir a base64
-  const base64 = await new Promise(res => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.readAsDataURL(blob);
-  });
-
   try {
-    // Transcribir con Claude API (Whisper-compatible via Anthropic)
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Transcribí y resumí esta nota de voz de campo agrícola en español. 
-Devolvé SOLO el texto de la nota, sin prefijos ni explicaciones. 
-Lote actual: ${activeLot.name} (${activeLot.ha} ha). 
-Si no hay audio claro, devolvé: "Nota de voz registrada."`
-            }
-          ]
-        }]
-      })
-    });
-
-    if (resp.ok) {
-      const d = await resp.json();
-      const text = d.content?.[0]?.text?.trim() || 'Nota de voz registrada.';
-      saveNote(activeLot, text);
-      setVoiceStatus('✅ Nota guardada');
-    } else {
-      // Fallback: guardar como nota genérica
-      saveNote(activeLot, 'Nota de voz registrada — ' + new Date().toLocaleTimeString('es-AR'));
-      setVoiceStatus('✅ Nota guardada');
-    }
-  } catch(e) {
-    saveNote(activeLot, 'Nota de voz registrada — ' + new Date().toLocaleTimeString('es-AR'));
-    setVoiceStatus('✅ Nota guardada');
-  }
-
-  setTimeout(() => setVoiceStatus(''), 3000);
+    saveNote(activeLot, 'Nota de voz — ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
+    document.getElementById('voice-status').textContent = '✅ Nota guardada';
+  } catch(e) {}
+  setTimeout(() => { document.getElementById('voice-status').textContent = ''; }, 3000);
 }
 
 function saveNote(lot, text) {
   const now = new Date();
   const date = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   notes[lot.id].unshift({ date, text });
-
-  // Guardar en localStorage
   try { localStorage.setItem('aleph_notes', JSON.stringify(notes)); } catch(e) {}
-
   renderNotes(lot);
   showToast('Anotación guardada en ' + lot.name);
 }
 
-function setVoiceStatus(msg) {
-  document.getElementById('voice-status').textContent = msg;
-}
-
-// ─── LEYENDA NDVI ─────────────────────────────────────────────────────
-(function drawLegend() {
+// ─── LEYENDA ──────────────────────────────────────────────────────────
+(function() {
   const canvas = document.getElementById('legend-canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = 140; canvas.height = 10;
   const colors = ['#d73027','#f46d43','#fdae61','#fee08b','#d9ef8b','#a6d96a','#66bd63','#1a9850'];
-  const w = 140 / colors.length;
-  colors.forEach((c, i) => {
-    ctx.fillStyle = c;
-    ctx.fillRect(i * w, 0, w, 10);
-  });
+  colors.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(i * (140/colors.length), 0, 140/colors.length, 10); });
 })();
 
 // ─── UTILS ────────────────────────────────────────────────────────────
 function setStatus(type, msg) {
-  const dot = document.getElementById('sdot');
-  dot.className = type === 'ok' ? 'ok' : '';
+  document.getElementById('sdot').className = type === 'ok' ? 'ok' : '';
   document.getElementById('stxt').textContent = msg;
 }
-
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-
 function showNDVILoading(show) {
   document.getElementById('ndvi-loading').className = show ? 'show' : '';
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────
-// Cargar notas guardadas
 try {
   const saved = localStorage.getItem('aleph_notes');
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    Object.assign(notes, parsed);
-  }
+  if (saved) Object.assign(notes, JSON.parse(saved));
 } catch(e) {}
 
 renderSidebar();
 setLayer('ndvi');
-getToken();
-
-// KMZ import (drag & drop)
-document.getElementById('map').addEventListener('dragover', e => e.preventDefault());
-document.getElementById('map').addEventListener('drop', async e => {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
-  if (file.name.endsWith('.kmz') || file.name.endsWith('.kml')) {
-    showToast('KMZ/KML: función de importación próximamente');
-  }
-});
 </script>
 </body>
 </html>
