@@ -152,8 +152,7 @@ body {
   <div style="display:flex;align-items:center;gap:6px;">
     <span class="label-xs">CAPA</span>
     <div class="layer-group">
-      <button class="lbtn" id="btn-sat" onclick="setLayer('sat')">Satélite</button>
-      <button class="lbtn on" id="btn-ndvi" onclick="setLayer('ndvi')">NDVI</button>
+      <button class="lbtn on" id="btn-sat" onclick="setLayer('sat')">Satélite</button>
       <button class="lbtn" id="btn-topo" onclick="setLayer('topo')">Topo</button>
     </div>
   </div>
@@ -213,22 +212,22 @@ const LOTS = [
     ha: 49.8,
     color: '#3fb950',
     coords: [
-      [-31.22036317, -61.48303497],
-      [-31.22118416, -61.47819839],
-      [-31.22168279, -61.47797641],
-      [-31.22198893, -61.47773570],
-      [-31.22284438, -61.47789610],
-      [-31.22290458, -61.47757659],
-      [-31.22044373, -61.47699935],
-      [-31.22024238, -61.47800115],
-      [-31.22099617, -61.47822617],
-      [-31.22006030, -61.48277380],
-      [-31.21959609, -61.48274555],
-      [-31.22001010, -61.47167874],
-      [-31.22527167, -61.47317586],
-      [-31.22324135, -61.48385986],
-      [-31.22058704, -61.48309274],
-      [-31.22036317, -61.48303497]
+      [-31.22036317411274, -61.48303497094992],
+      [-31.22118416341140, -61.47819839331395],
+      [-31.22168279146114, -61.47797641694797],
+      [-31.22198893686958, -61.47773570643056],
+      [-31.22284438733052, -61.47789610290850],
+      [-31.22290458681472, -61.47757659306834],
+      [-31.22044373407267, -61.47699935817017],
+      [-31.22024238608856, -61.47800115786195],
+      [-31.22099617316868, -61.47822617273120],
+      [-31.22006030143944, -61.48277380645671],
+      [-31.21959609828583, -61.48274555017996],
+      [-31.22001010697997, -61.47167874834972],
+      [-31.22527167214740, -61.47317586769794],
+      [-31.22324135222972, -61.48385986920024],
+      [-31.22058704969472, -61.48309274565683],
+      [-31.22036317411274, -61.48303497094992]
     ]
   },
   {
@@ -238,13 +237,18 @@ const LOTS = [
     ha: 86.7,
     color: '#58a6ff',
     coords: [
-      [-31.27113207, -61.69095192],
-      [-31.27044807, -61.68402596],
-      [-31.27180101, -61.67728519],
-      [-31.27804737, -61.67881045],
-      [-31.27574039, -61.69204904],
-      [-31.27151179, -61.69098913],
-      [-31.27113207, -61.69095192]
+      [-31.27113207779932, -61.69095192323584],
+      [-31.27044807923644, -61.68402596147863],
+      [-31.27180101352654, -61.67728519654274],
+      [-31.27804737264167, -61.67881045779503],
+      [-31.27574039043199, -61.69204904010132],
+      [-31.27151179250234, -61.69098913119504],
+      [-31.27142057968247, -61.69100651022310],
+      [-31.27138707887207, -61.69099778326411],
+      [-31.27126980070651, -61.69096722852084],
+      [-31.27119908324168, -61.69096937758381],
+      [-31.27111159477884, -61.69096715817393],
+      [-31.27113207779932, -61.69095192323584]
     ]
   }
 ];
@@ -271,25 +275,14 @@ function setLayer(type) {
   currentLayer = type;
   document.querySelectorAll('.lbtn').forEach(b => b.classList.remove('on'));
   document.getElementById('btn-' + type).classList.add('on');
-
   Object.values(baseLayers).forEach(l => { if (map.hasLayer(l)) map.removeLayer(l); });
-  if (ndviLayer) { map.removeLayer(ndviLayer); ndviLayer = null; }
-
   if (type === 'sat') {
     baseLayers.sat.addTo(map);
-    document.getElementById('legend').style.display = 'none';
     setStatus('ok', 'Satélite');
   } else if (type === 'topo') {
     baseLayers.topo.addTo(map);
-    document.getElementById('legend').style.display = 'none';
     setStatus('ok', 'Topográfico');
-  } else if (type === 'ndvi') {
-    baseLayers.sat.addTo(map);
-    document.getElementById('legend').style.display = 'block';
-    loadNDVI();
   }
-
-  // Polígonos siempre al frente
   setTimeout(() => LOTS.forEach(l => { if (l._polygon) l._polygon.bringToFront(); }), 300);
 }
 
@@ -511,7 +504,7 @@ try {
 } catch(e) {}
 
 renderSidebar();
-setLayer('ndvi');
+setLayer('sat');
 </script>
 </body>
 </html>
